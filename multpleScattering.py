@@ -5,20 +5,26 @@ import math
 import random
 
 
-nEvents = 100
+random.seed(1.0)
+
+nEvents = 100000
 
 xDistance = 100
 
 yRange = [-100, 100]
 
-typicalScatteringDistance = 20
-
-random.seed(1.0)
+typicalScatteringDistance = 10
 
 angleConstant = 1.0
 
+speedDecreaseConstant = .95
+
+magneticField = 1.0
+
+massOverCharge = 1.0
+
 @jit
-def shootParticle(angle, speed):
+def shootParticle(angle, speed, charge):
 
     sigma = angleConstant/(speed*100)
     x = 0
@@ -47,17 +53,15 @@ def shootParticle(angle, speed):
 
         deltaAngle = sigma*2*(.5-random.random())
         angle = angle + deltaAngle
-        speed = speed*.95
+        speed = speed*speedDecreaseConstant
         sigma = angleConstant/(speed*100)
 
     return -999
 
-count = 100000
-value = 0
 
 y = []
-for i in range(count):
-    hitLocation = shootParticle(0,1)
+for i in range(nEvents):
+    hitLocation = shootParticle(0,1, 1)
     if hitLocation != -999: y.append(hitLocation)
 
 
