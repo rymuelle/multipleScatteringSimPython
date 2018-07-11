@@ -23,53 +23,106 @@ magneticField = 1.0
 
 massOverCharge = 1.0
 
-@jit
-def shootParticle(angle, speed, charge):
+pi = 3.1415
 
+verbose = 10
+
+xBound = [0, 100]
+
+yBound = [-100, 100]
+
+
+def scatteringDistance():
+    scatteringDistance =  typicalScatteringDistance/(10*random.random() )
+    return scatteringDistance
+
+def scatteringAngle(speed):
     sigma = angleConstant/(speed*100)
-    x = 0
-    y = 0
-    while(True): 
-        currentX = x
+    deltaAngle = sigma*2*(.5-random.random())
+    return deltaAngle
 
-        scatteringDistance =  typicalScatteringDistance/(10*random.random() )
+def scatteringSpeed(speed):
+    speed = .95*speed
+    return speed
 
-        x = x + scatteringDistance*math.cos(angle)
-        y = y + scatteringDistance*math.sin(angle)
+#@jit
+def iterateMuon(angleInitial, speed, charge, xInitial, yInitial):
+    radiusOfCurvature = massOverCharge*speed/magneticField #negative means curve the other way
 
-        #print x, y
+    #flip y by charge, then flip back
+    yInitial = yInitial*charge
 
-        if x > xDistance:
-            scatteringDistance =  (xDistance - currentX)/math.cos(angle)
-            x = 100
-            y = y + scatteringDistance*math.sin(angle)
+    x0 = xInitial - radiusOfCurvature*math.sin(angleInitial)
+    y0 = yInitial + radiusOfCurvature*math.cos(angleInitial)
 
-            #print y
+    #calculate scattering distance:
+    distance = scatteringDistance()
 
-            return y
+    circumference = 2*pi*abs(radiusOfCurvature)
 
-        if y > yRange[1] or y < yRange[0]:
-            return -999
+    if distance > circumference:
+        distance = -999
+        xFinal, yFinal, angleFinal = xInitial, yInitial, angleInitial
+    else:
+        angleCovered = distance/circumference*2*pi #angles are radians
+        angleFinal = angleInitial + angleCovered + scatteringAngle(speed)
 
-        deltaAngle = sigma*2*(.5-random.random())
-        angle = angle + deltaAngle
-        speed = speed*speedDecreaseConstant
-        sigma = angleConstant/(speed*100)
+        xFinal = x0+radiusOfCurvature*math.sin(angleFinal)
+        yFinal = y0-radiusOfCurvature*math.cos(angleFinal)
 
-    return -999
+        speed = scatteringSpeed(speed)
+
+    if xFinal < xInitial:
+        distance = -999
+
+    #flip y by charge, then flip back
+    yFinal = yFinal*charge
+
+    return xFinal, yFinal, angleFinal, speed, distance
+
+def propagateMuon(angleInitial, speed, charge, xInitial, yInitial):
+    for i in range(100):
+        xInitial, yInitial, angleInitial, speed, distance = iterateMuon(angleInitial, speed, charge, xInitial, yInitial)
+
+        if verbose > 9: print angleInitial, "\t", speed, "\t", charge, "\t", xInitial, "\t", yInitial
+
+        if distance == -999:
+            break
+
+        if xBound[0] > xInitial or xBound[1] < xInitial:
+            break
+
+        if yBound[0] > yInitial or yBound[1] < yInitial:
+            break
+
+    if verbose > 9: print "end loop"
+
+
+
+ 
 
 
 y = []
 for i in range(nEvents):
-    hitLocation = shootParticle(0,1, 1)
-    if hitLocation != -999: y.append(hitLocation)
+    angle = 0
+    speed = 1000
+
+    charge = random.random()
+    if charge > .5: charge = 1
+    else: charge = -1
+
+    xInitial = 0
+    yInitial = 0
+    if verbose > 9: print "start ", angle, speed, charge, xInitial, yInitial
+    hitLocation = propagateMuon(angle, speed, charge, xInitial, yInitial)
+    #if hitLocation != -999: y.append(hitLocation)
 
 
-n, bins, patches = plt.hist(y, 50, density=True, facecolor='g', alpha=0.75,range=[-10, 10])
-
-
-plt.xlabel('y position')
-plt.ylabel('Probability')
-plt.title('Histogram of hit locations')
-#plt.show()
-plt.savefig("output/hit_position_hist.png")
+#n, bins, patches = plt.hist(y, 50, density=True, facecolor='g', alpha=0.75,range=[-10, 10])
+#
+#
+#plt.xlabel('y position')
+#plt.ylabel('Probability')
+#plt.title('Histogram of hit locations')
+##plt.show()
+#plt.savefig("output/hit_position_hist.png")
