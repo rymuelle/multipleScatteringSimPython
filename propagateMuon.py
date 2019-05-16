@@ -15,7 +15,7 @@ def propagateMuon(angleInitial, speed, charge, xInitial, yInitial):
     
     #make ieal track
     try:
-        slopeInital = math.atan(angleInitial)
+        slopeInital = math.tan(angleInitial)
     except:
         print "bad angle"
         return []
@@ -32,14 +32,14 @@ def propagateMuon(angleInitial, speed, charge, xInitial, yInitial):
     while xPositions[-1] < xBound[1]:
         pathLength = scatteringDistance()
         deltaAngle = scatteringAngle(speed)
-
+        
         nextXPosition = xPositions[-1]+math.cos(currentAngle)*pathLength
         nextYPosition = yPositions[-1]+math.sin(currentAngle)*pathLength
 
-        if nextXPosition > xBound[1]:
-            pathLength = (xBound[1]-xPositions[-1])/math.cos(currentAngle)
-            nextXPosition = xBound[1]
-            nextYPosition = yPositions[-1]+math.sin(currentAngle)*pathLength
+        #if nextXPosition > xBound[1]:
+        #    pathLength = (xBound[1]-xPositions[-1])/math.cos(currentAngle)
+        #    nextXPosition = xBound[1]
+        #    nextYPosition = yPositions[-1]+math.sin(currentAngle)*pathLength
 
         xPositions.append(nextXPosition)
         yPositions.append(nextYPosition)
