@@ -1,6 +1,6 @@
 
 
-nEvents = 10
+nEvents = 1000
 
 xDistance = 100
 
@@ -8,7 +8,7 @@ yRange = [-100, 100]
 
 typicalScatteringDistance = 10
 
-angleConstant = 4
+angleConstant = 40
 
 speedDecreaseConstant = .95
 
