@@ -41,12 +41,15 @@ class chamber:
 
 
 
+
 y = []
 for i in range(nEvents):
 
     if i%1000==0: print i*1.0/nEvents
-    angle = 0
-    speed = 1000
+
+    #set up inital state of muon
+    angleInitial = -.1
+    speedInitial = 1000
 
     charge = random.random()
     if charge > .5: charge = 1
@@ -54,10 +57,17 @@ for i in range(nEvents):
 
     xInitial = 0
     yInitial = 0
-    if verbose > 5: print "start  angle {} speed {} charge {} x {} y {}".format( angle, speed, charge, xInitial, yInitial)
-    yTrackOut, yHitOut, angleTrack = propagateMuon(angle, speed, charge, xInitial, yInitial)
-    residual =  yTrackOut, yHitOut
-    residualLeavingBounds.append(residual)
+
+    #create muon track
+    if verbose > 5: print "start  angle {} speed {} charge {} x {} y {}".format( angleInitial, speedInitial, charge, xInitial, yInitial)
+    muonTrack, muonPath = propagateMuon(angleInitial, speedInitial, charge, xInitial, yInitial)
+
+    plt.plot(muonTrack[0],muonTrack[1])
+    plt.plot(muonPath[0],muonPath[1])
+    plt.show()
+
+    #residual =  yTrackOut, yHitOut
+    #residualLeavingBounds.append(residual)
     #if hitLocation != -999: y.append(hitLocation)
 
 '''

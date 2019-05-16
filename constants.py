@@ -1,6 +1,6 @@
 
 
-nEvents = 1000
+nEvents = 10
 
 xDistance = 100
 
