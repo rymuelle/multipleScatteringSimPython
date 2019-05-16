@@ -1,6 +1,6 @@
 
 
-nEvents = 10000
+nEvents = 1000
 
 xDistance = 100
 
@@ -18,8 +18,8 @@ massOverCharge = 1.0
 
 pi = 3.1415
 
-verbose = 5
+verbose = 1
 
 xBound = [0, 100]
 
-yBound = [-100, 100]
+yBound = [-1000, 1000]
