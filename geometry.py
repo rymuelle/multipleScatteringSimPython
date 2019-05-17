@@ -61,7 +61,7 @@ def boolIntersect(segment, R):
         hit = False
     return hit
 
-@jit
+'''@jit
 def intersectAndHit(segment1, segment2):
     p1 = [segment1[0][0],segment1[1][0]]
     p2 = [segment1[0][1],segment1[1][1]]
@@ -76,7 +76,21 @@ def intersectAndHit(segment1, segment2):
         if boolIntersect(segment1, R) and boolIntersect(segment2, R):
             hit = True
 
-    return R, hit, 
+    return R, hit, '''
+
+
+@jit
+def intersectAndHit(segment1, segment2):
+    p1 = [segment1[0][0],segment1[1][0]]
+    p2 = [segment1[0][1],segment1[1][1]]
+    L1 = line(p1, p2)
+    p1 = [segment2[0][0],segment2[1][0]]
+    p2 = [segment2[0][1],segment2[1][1]]
+    L2 = line(p1, p2)
+    R = intersection(L1, L2)
+
+    return R
+
 @jit
 def returnRotation(cordRotation, x,y):
     newX = math.cos(cordRotation)*x - math.sin(cordRotation)*y
@@ -94,3 +108,11 @@ def returnLocalDxDy(cordRotation, segment):
         return float('nan')
     newSlope = (newY1-newY0)/(newX1 -newX0)
     return newSlope
+
+@jit
+def transformCord(cordX, cordY, cordRotation, point):
+    cordRotation = -(cordRotation - math.pi/2)
+    x, y = point[0]-cordX, point[1]-cordY
+    newX, newY =  returnRotation(cordRotation, x,y)
+    return [newX, newY]
+

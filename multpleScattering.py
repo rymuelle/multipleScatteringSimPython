@@ -10,56 +10,75 @@ from circleIntersectLine import circleIntersectLine
 from propagateMuon import propagateMuon
 from chamber import chamber
 import numpy as np
+import pickle
 random.seed(1.0)
 
 residualLeavingBounds = []
 
 
-chamber1 = chamber(1, 100, math.pi/2, 50, 0, math.pi/2 , 45, 0)
+designLength, designPhi, designX, designY = 100, math.pi/2, 50, 0
+deltaPhi, deltaX, deltaY = .1,2,-3
+chamber1 = chamber(1, designLength, designPhi, designX, designY, designPhi+deltaPhi, designX+deltaX, designY+deltaY)
 chamber1.plotChamber()
 
 plt.axis([0, 100, -100, 100])
+def calculateResiduals(chamber1):
+    for i in range(nEvents):
+    
+        if i%1000==0: print i*1.0/nEvents
+    
+        #set up inital state of muon
+        angleInitial = 0.0
+        speedInitial = 1000
+    
+        angleInitial = random.random()-.5
+    
+        charge = random.random()
+        if charge > .5: charge = 1
+        else: charge = -1
+    
+        xInitial = 0
+        yInitial = 0
+    
+        #create muon track
+        if verbose > 5: print "start  angle {} speed {} charge {} x {} y {}".format( angleInitial, speedInitial, charge, xInitial, yInitial)
+        muonTrack, muonPath = propagateMuon(angleInitial, speedInitial, charge, xInitial, yInitial)
+    
+        chamber1.getResiduals(muonTrack, muonPath)
+    
+        # note the y and x axis are not to scale, meaning things are stretched. A tilted chamber will look shorter
+        if i%100==0:
+            #plt.clf()
+            trackPaths = plt.plot(muonTrack[0],muonTrack[1], color='orange', label="track")
+            muonPaths = plt.plot(muonPath[0],muonPath[1], marker = 'o', color='red', label="actual path")
+            legend = plt.legend()
+            plt.pause(0.001)
+            for muonPath in muonPaths:
+                muonPath.remove()
+            for trackPath in trackPaths:
+                trackPath.remove()
+           #plt.show()
+            #plt.draw()
+            #plt.clf()
 
-for i in range(nEvents):
 
-    if i%1000==0: print i*1.0/nEvents
+learningRates = [100,10,.1]
+stepSizes = [.1,.1,.1]
+for i in range(20):
 
-    #set up inital state of muon
-    angleInitial = 0
-    speedInitial = 1000
 
-    angleInitial = random.random()-.5
+    calculateResiduals(chamber1)
 
-    charge = random.random()
-    if charge > .5: charge = 1
-    else: charge = -1
+    chamber1.alignGradDescent(learningRates, stepSizes)
+    #chamber1.align()
 
-    xInitial = 0
-    yInitial = 0
+    chamber1.cleanChamberPlot()
 
-    #create muon track
-    if verbose > 5: print "start  angle {} speed {} charge {} x {} y {}".format( angleInitial, speedInitial, charge, xInitial, yInitial)
-    muonTrack, muonPath = propagateMuon(angleInitial, speedInitial, charge, xInitial, yInitial)
-
-    chamber1.getResiduals(muonTrack, muonPath)
-
-    # note the y and x axis are not to scale, meaning things are stretched. A tilted chamber will look shorter
-    if i%100==0:
-        #plt.clf()
-        trackPaths = plt.plot(muonTrack[0],muonTrack[1], color='orange', label="track")
-        muonPaths = plt.plot(muonPath[0],muonPath[1], marker = 'o', color='red', label="actual path")
-        legend = plt.legend()
-        plt.pause(0.001)
-        for muonPath in muonPaths:
-            muonPath.remove()
-        for trackPath in trackPaths:
-            trackPath.remove()
-       #plt.show()
-        #plt.draw()
-        #plt.clf()
+    chamber1.plotChamber()
 
 
 
+'''
 xResidual = np.subtract( chamber1.hit[1], chamber1.track[1])
 dxdyResidual = np.subtract( chamber1.hitXOverY, chamber1.trackXOverY)
 
@@ -70,7 +89,11 @@ plt.show()
 plt.hist(dxdyResidual)
 plt.show()
 
-plt.scatter(xResidual,dxdyResidual)
+plt.scatter(xResidual,dxdyResidual, alpha=.1)
 plt.show()
-
+'''
+#output = {"length":designLength, "xDesign":chamber1.designX, "yDesign":chamber1.designY, "angleDesign":chamber1.designAngle, "xActual":chamber1.actualX, "yActual":chamber1.actualY, "angleActual":chamber1.actualAngle, "yHit": chamber1.hit[1], "yTrack":chamber1.track[1], "dxdyHit": chamber1.hitXOverY, "dxdyTrack":chamber1.trackXOverY}
+#
+#with open("output/chamber_residuals_nEvent_{}_des_{}_{}_{}_actual_{}_{}_{}.pickle".format(nEvents,chamber1.designX,chamber1.designY,chamber1.designAngle,chamber1.actualX,chamber1.actualY,chamber1.actualAngle), 'wb') as f:
+#    pickle.dump(output, f)
 
