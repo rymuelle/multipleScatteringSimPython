@@ -16,13 +16,14 @@ random.seed(1.0)
 residualLeavingBounds = []
 
 
-designLength, designPhi, designX, designY = 100, math.pi/2, 50, 0
-deltaPhi, deltaX, deltaY = .1,2,-3
+designLength, designPhi, designX, designY = 50, math.pi/2, 50, 25
+deltaPhi, deltaX, deltaY = 0,1,0
+#eltaPhi, deltaX, deltaY = .1,-2,1
 chamber1 = chamber(1, designLength, designPhi, designX, designY, designPhi+deltaPhi, designX+deltaX, designY+deltaY)
 chamber1.plotChamber()
 
 plt.axis([0, 100, -100, 100])
-def calculateResiduals(chamber1):
+def shootMuons(chamber1):
     for i in range(nEvents):
     
         if i%1000==0: print i*1.0/nEvents
@@ -62,12 +63,12 @@ def calculateResiduals(chamber1):
             #plt.clf()
 
 
-learningRates = [100,10,.1]
-stepSizes = [.1,.1,.1]
-for i in range(20):
+learningRates = [50,10,1.5]
+stepSizes = [.01,.01,.01]
+for i in range(40):
 
 
-    calculateResiduals(chamber1)
+    shootMuons(chamber1)
 
     chamber1.alignGradDescent(learningRates, stepSizes)
     #chamber1.align()
