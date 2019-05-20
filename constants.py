@@ -1,10 +1,10 @@
 
 
-nEvents = 1000
+nEvents = 10000
 
 xDistance = 100
 
-yRange = [-100, 100]
+yRange = [-200, 200]
 
 typicalScatteringDistance = 10
 

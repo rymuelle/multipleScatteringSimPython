@@ -26,6 +26,9 @@ class chamber:
         self.trackXOverY = []
         self.alignStep  = [1,1,.5]
 
+        self.fitness = []
+        self.residualY = []
+
 
 
 
@@ -65,7 +68,7 @@ class chamber:
             self.track[0].append(transformedInterceptTrack[0])
             self.track[1].append(transformedInterceptTrack[1])
             self.trackXOverY.append(trackSlope)
-            
+
     def alignGradDescent(self, learningRates, stepSizes):
         hitY = np.asarray(self.hit[1])
         trackY = np.asarray(self.track[1])  
@@ -75,8 +78,9 @@ class chamber:
         possibleYDisplacements = [-stepSizes[1], 0, stepSizes[1]]
         possibleAngleDisplacements = [-stepSizes[2], 0, stepSizes[2]]
 
-        yDis = 0
-        angleDis = 0
+
+
+        #possibleXDisplacements = [0]
 
         minValue = 1000
         lowesState = [0,0,0]
@@ -109,9 +113,9 @@ class chamber:
 
         #deltaX, deltaY, deltaAngle = 0,0,0
         newX, newY, newAngle = deltaX, deltaY, deltaAngle
-        #print "design",  self.designX, self.designY, self.designAngle
-        #print "actual", self.actualX, self.actualY, self.actualAngle
-        #print "update", newX, newY, newAngle
+        print "design",  self.designX, self.designY, self.designAngle
+        print "actual", self.actualX, self.actualY, self.actualAngle
+        print "update", newX, newY, newAngle
         self.designAngle = self.designAngle + newAngle
         self.designX = self.designX + newX
         self.designY = self.designY + newY
@@ -123,6 +127,11 @@ class chamber:
         if abs(newAngle) < self.alignStep[2]/2:
             self.alignStep[2] = self.alignStep[2]/2
 
+        self.fitness.append(stdDev)
+        self.residualY = residualY
+
+
+    def resetData(self):
         #print "design after align",  self.designX, self.designY, self.designAngle, self.designEndpoints
         self.hit = [[],[]]
         self.hitXOverY = []
@@ -143,9 +152,9 @@ class chamber:
         possibleYDisplacements = np.linspace(-self.alignStep[1], self.alignStep[1], 10)
         possibleAngleDisplacements = np.linspace(-self.alignStep[2], self.alignStep[2], 10)
 
-        possibleYDisplacements = [0]
+        #possibleYDisplacements = [0]
         #possibleXDisplacements = [0]
-        possibleAngleDisplacements=[0]
+        #possibleAngleDisplacements=[0]
         #possibleXDisplacements = [-.01,.01]
         #possibleYDisplacements = [-.01,.01]
         #possibleAngleDisplacements = [-.01,.01]
@@ -188,12 +197,19 @@ class chamber:
 
 
 
-    def plotChamber(self):
-        self.designPlot = plt.plot(self.designEndpoints[0],self.designEndpoints[1], color='blue', label="design Chamber Postition")
-        self.actualPlot = plt.plot(self.actualEndpoints[0],self.actualEndpoints[1], color='green', label="actual Chamber Postition")
+    def plotChamber(self,sub1,sub2,sub3):
+ 
+        self.designPlot = sub1.plot(self.designEndpoints[0],self.designEndpoints[1], color='blue', label="design Chamber Postition")
+        self.actualPlot = sub1.plot(self.actualEndpoints[0],self.actualEndpoints[1], color='green', label="actual Chamber Postition")
+
+        self.fitnessPlot = sub2.plot(self.fitness, color='black', label="fitness")
+        self.residualPlot =  sub3.hist(self.residualY)
 
     def cleanChamberPlot(self):
         for plot in self.designPlot:
             plot.remove()
         for plot in self.actualPlot:
             plot.remove()
+        for plot in self.fitnessPlot:
+            plot.remove()
+

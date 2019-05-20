@@ -16,20 +16,46 @@ random.seed(1.0)
 residualLeavingBounds = []
 
 
-designLength, designPhi, designX, designY = 50, math.pi/2, 50, 25
-deltaPhi, deltaX, deltaY = 0,1,0
+sub1 = plt.subplot(212)
+sub1.margins(0.05)           # Default margin is 0.05, value 0 means fit
+sub1.set_xlim([0, 100])
+sub1.set_ylim([-200, 200])
+
+sub2 = plt.subplot(221) 
+sub2.set_title('Fitness')
+sub2.set_xlim([0, 40])
+
+sub3 = plt.subplot(222)
+sub3.set_title('y Residual')
+
+#plt.show()
+
+
+#sub1 = plt.subplot(212)
+#sub1.set_xlim([0, 100])
+#sub1.set_ylim([-100, 100])
+##sub1.axis([0, 100, -100, 100])
+#sub2 = plt.subplot(221)
+#sub2.set_xlim([0, 40])
+#sub3 = plt.subplot(222)
+#sub3.set_xlim([-10, 10])
+#sub2.plot([0,1])
+
+
+designLength, designPhi, designX, designY = 100, math.pi/2, 50, 0
+deltaPhi, deltaX, deltaY = .01,5,0
 #eltaPhi, deltaX, deltaY = .1,-2,1
 chamber1 = chamber(1, designLength, designPhi, designX, designY, designPhi+deltaPhi, designX+deltaX, designY+deltaY)
-chamber1.plotChamber()
+chamber1.plotChamber(sub1,sub2,sub3)
 
-plt.axis([0, 100, -100, 100])
+
 def shootMuons(chamber1):
     for i in range(nEvents):
     
         if i%1000==0: print i*1.0/nEvents
     
         #set up inital state of muon
-        angleInitial = 0.0
+        angleInitial = 1
         speedInitial = 1000
     
         angleInitial = random.random()-.5
@@ -48,11 +74,11 @@ def shootMuons(chamber1):
         chamber1.getResiduals(muonTrack, muonPath)
     
         # note the y and x axis are not to scale, meaning things are stretched. A tilted chamber will look shorter
-        if i%100==0:
+        if i%10000==0:
             #plt.clf()
-            trackPaths = plt.plot(muonTrack[0],muonTrack[1], color='orange', label="track")
-            muonPaths = plt.plot(muonPath[0],muonPath[1], marker = 'o', color='red', label="actual path")
-            legend = plt.legend()
+            trackPaths = sub1.plot(muonTrack[0],muonTrack[1], color='orange', label="track")
+            muonPaths = sub1.plot(muonPath[0],muonPath[1], marker = 'o', color='red', label="actual path")
+            legend = sub1.legend()
             plt.pause(0.001)
             for muonPath in muonPaths:
                 muonPath.remove()
@@ -65,17 +91,19 @@ def shootMuons(chamber1):
 
 learningRates = [50,10,1.5]
 stepSizes = [.01,.01,.01]
-for i in range(40):
+for i in range(400):
 
 
     shootMuons(chamber1)
 
-    chamber1.alignGradDescent(learningRates, stepSizes)
+    #chamber1.alignGradDescent(learningRates, stepSizes)
+
+    chamber1.align()
     #chamber1.align()
+    chamber1.resetData()
 
     chamber1.cleanChamberPlot()
-
-    chamber1.plotChamber()
+    chamber1.plotChamber(sub1,sub2,sub3)
 
 
 
